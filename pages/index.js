@@ -1,9 +1,22 @@
 import MeetupList from "../components/meetups/MeetupList";
+import Head from "next/head";
 
 import { MongoClient } from "mongodb";
 
 const HomePage = (props) => {
-  return <MeetupList meetups={props.meetups} />;
+  return (
+    <>
+      <Head>
+        <title>Meetings</title>
+        <meta
+          name="description"
+          content="A react Meeting App Created using nextjs framework which is a minimilistic Framework for app
+                                         Here Display all the meeting of the App"
+        />
+      </Head>
+      <MeetupList meetups={props.meetups} />
+    </>
+  );
 };
 
 export async function getStaticProps() {
