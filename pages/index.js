@@ -39,6 +39,7 @@ export async function getStaticProps() {
         id: meeting._id.toString(),
       })),
     },
+    revalidate: 1,
   };
 }
 
