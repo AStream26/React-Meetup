@@ -1,47 +1,52 @@
 import Meetupdetail from "../../components/meetups/Meetupdetail";
-
-const Meetup = () => {
+import { MongoClient, ObjectId } from "mongodb";
+const Meetup = (props) => {
   return (
     <Meetupdetail
-      img="https://images.unsplash.com/photo-1584732200355-486a95263014?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80"
-      title="A First Meetup"
-      address="Meeting Address: Somewhere in the earth"
-      desc="This is a description area .Tell aboout the meeting in detail"
+      img={props.meetupdetail.image}
+      title={props.meetupdetail.title}
+      address={props.meetupdetail.address}
+      desc={props.meetupdetail.description}
     />
   );
 };
 
 export async function getStaticPaths() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://astream26:26022999@cluster0.hsbem.mongodb.net/meetings?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  const collections = db.collection("meetings");
+  const data = await collections.find({}, { _id: 1 }).toArray();
+  client.close();
+
   return {
     fallback: false,
-    paths: [
-      {
-        params: {
-          meetup: "M1",
-        },
-      },
-      {
-        params: {
-          meetup: "M2",
-        },
-      },
-    ],
+    paths: data.map((meeting) => ({
+      params: { meetup: meeting._id.toString() },
+    })),
   };
 }
 
 export async function getStaticProps(context) {
   // fetch Data
   const meetupId = context.params.meetup;
-  console.log(meetupId);
+  const client = await MongoClient.connect(
+    "mongodb+srv://astream26:26022999@cluster0.hsbem.mongodb.net/meetings?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  const collections = db.collection("meetings");
+  const data = await collections.findOne({ _id: ObjectId(meetupId) });
+  // console.log(meetupId);
 
   return {
     props: {
       meetupdetail: {
-        id: meetupId,
-        img: "https://images.unsplash.com/photo-1584732200355-486a95263014?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80",
-        title: "A First Meetup",
-        address: "Meeting Address: Somewhere in the earth",
-        desc: "This is a description area .Tell aboout the meeting in detail",
+        id: data._id.toString(),
+        address: data.address,
+        title: data.title,
+        description: data.description,
+        image: data.image,
       },
     },
   };
